@@ -265,7 +265,7 @@ M.frames = {
     local frames = thread.frames
     require("dap.async").run(function()
       if not frames then
-        local err, response = session:request("stackTrace", { threadId = thread.id })
+        local err, response = session:request("stackTrace", { startFrame = 0, threadId = thread.id })
         ---@cast response dap.StackTraceResponse
         if err or not response then
           layer.render({"Stopped thread has no frames"})

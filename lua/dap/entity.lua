@@ -359,7 +359,7 @@ function threads_spec.fetch_children(thread, cb)
         end)
         coroutine.yield()
       end
-      local params = { threadId = thread.id }
+      local params = { startFrame = 0, threadId = thread.id }
       local err, resp = session:request('stackTrace', params)
       if err then
         utils.notify('Error fetching stackTrace: ' .. tostring(err), vim.log.levels.WARN)

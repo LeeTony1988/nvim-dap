@@ -814,6 +814,10 @@ end
 
 ---@param body dap.TerminatedEvent
 function Session:event_terminated(body)
+  -- Some adapters (notably vsdbg) return a non-zero exit code after the
+  -- client closes the transport in response to `terminated`. Mark this
+  -- teardown as expected so the spawn callback does not report a false error.
+  self.terminated = true
   self:close()
   if body and body.restart ~= nil and body.restart ~= false then
     local config = vim.deepcopy(self.config)
@@ -1608,7 +1612,8 @@ function Session.spawn(adapter, config, opts)
   handle, pid_or_err = uv.spawn(adapter.command, spawn_opts, function(code)
     log:info('Process exit', adapter.command, code, pid_or_err)
     onexit()
-    if code == 0 then
+    local expected_termination = session and session.terminated
+    if code == 0 or expected_termination then
       stderrlog:remove()
     else
       stderrlog:close()
